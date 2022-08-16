@@ -3,7 +3,6 @@ package ru.job4j.quartz;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
 import java.util.Properties;
@@ -14,14 +13,12 @@ import static org.quartz.TriggerBuilder.newTrigger;
 
 public class AlertRabbit {
 
-    private static Connection connection;
-
     public static void main(String[] args) {
         try (InputStream in = AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
             Properties config = new Properties();
             config.load(in);
             Class.forName(config.getProperty("driver"));
-            AlertRabbit.connection = DriverManager.getConnection(
+            Connection connection = DriverManager.getConnection(
                     config.getProperty("url"),
                     config.getProperty("username"),
                     config.getProperty("password")
@@ -34,7 +31,7 @@ public class AlertRabbit {
                     .usingJobData(data)
                     .build();
             SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(readPropertyOfInterval())
+                    .withIntervalInSeconds(Integer.parseInt(config.getProperty("rabbit.interval")))
                     .repeatForever();
             Trigger trigger = newTrigger()
                     .startNow()
@@ -61,14 +58,5 @@ public class AlertRabbit {
                 e.printStackTrace();
             }
         }
-    }
-
-    public static int readPropertyOfInterval() throws IOException {
-        Properties config = new Properties();
-        try (InputStream in = AlertRabbit.class.getClassLoader()
-                .getResourceAsStream("rabbit.properties")) {
-            config.load(in);
-        }
-        return Integer.parseInt(config.getProperty("rabbit.interval"));
     }
 }
