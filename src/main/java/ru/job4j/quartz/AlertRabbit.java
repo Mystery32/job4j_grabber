@@ -18,28 +18,29 @@ public class AlertRabbit {
             Properties config = new Properties();
             config.load(in);
             Class.forName(config.getProperty("driver"));
-            Connection connection = DriverManager.getConnection(
+            try (Connection connection = DriverManager.getConnection(
                     config.getProperty("url"),
                     config.getProperty("username"),
                     config.getProperty("password")
-            );
-            Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
-            scheduler.start();
-            JobDataMap data = new JobDataMap();
-            data.put("connection", connection);
-            JobDetail job = newJob(Rabbit.class)
-                    .usingJobData(data)
-                    .build();
-            SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(Integer.parseInt(config.getProperty("rabbit.interval")))
-                    .repeatForever();
-            Trigger trigger = newTrigger()
-                    .startNow()
-                    .withSchedule(times)
-                    .build();
-            scheduler.scheduleJob(job, trigger);
-            Thread.sleep(10000);
-            scheduler.shutdown();
+            )) {
+                Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+                scheduler.start();
+                JobDataMap data = new JobDataMap();
+                data.put("connection", connection);
+                JobDetail job = newJob(Rabbit.class)
+                        .usingJobData(data)
+                        .build();
+                SimpleScheduleBuilder times = simpleSchedule()
+                        .withIntervalInSeconds(Integer.parseInt(config.getProperty("rabbit.interval")))
+                        .repeatForever();
+                Trigger trigger = newTrigger()
+                        .startNow()
+                        .withSchedule(times)
+                        .build();
+                scheduler.scheduleJob(job, trigger);
+                Thread.sleep(10000);
+                scheduler.shutdown();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
