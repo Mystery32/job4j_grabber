@@ -13,7 +13,8 @@ import static org.quartz.TriggerBuilder.newTrigger;
 
 public class AlertRabbit {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException, SQLException {
+        Connection check = null;
         try (InputStream in = AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
             Properties config = new Properties();
             config.load(in);
@@ -40,10 +41,14 @@ public class AlertRabbit {
                 scheduler.scheduleJob(job, trigger);
                 Thread.sleep(10000);
                 scheduler.shutdown();
+                check = connection;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        Thread.sleep(5000);
+        assert check != null;
+        System.out.println(check.isClosed());
     }
 
     public static class Rabbit implements Job {
