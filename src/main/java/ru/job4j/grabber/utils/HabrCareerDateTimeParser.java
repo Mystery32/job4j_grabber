@@ -7,7 +7,7 @@ public class HabrCareerDateTimeParser implements DateTimeParser {
 
     @Override
     public LocalDateTime parse(String parse) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
         return LocalDateTime.parse(parse, formatter);
     }
 }

@@ -31,5 +31,6 @@ public class HabrCareerParse {
             String parseData = hcdtp.parse(data).toString();
             System.out.printf("%s %s %s %n", vacancyName, parseData, link);
         });
+
     }
 }
