@@ -32,7 +32,7 @@ public class HabrCareerParse {
                 String data = vacancyDate.attr("datetime");
                 String parseData = dataParser.parse(data).toString();
                 String description = vacancyParser.retrieveDescription(link);
-                System.out.printf("%s %s %s%n %s", vacancyName, parseData, link, description);
+                System.out.printf("%s %s %s%n %s%n", vacancyName, parseData, link, description);
             }
         }
     }
@@ -40,8 +40,7 @@ public class HabrCareerParse {
     private String retrieveDescription(String link) throws IOException {
         Connection connection = Jsoup.connect(link);
         Document document = connection.get();
-        Element descriptionElement = document.select(".application/ld+json").first();
-        Element vacancyDescription = descriptionElement.child(0);
-        return vacancyDescription.attr("description");
+        Elements descriptionElement = document.select(".style-ugc");
+        return descriptionElement.text();
     }
 }
