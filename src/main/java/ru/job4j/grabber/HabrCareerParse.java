@@ -14,24 +14,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HabrCareerParse implements Parse {
-
+    private static final String SOURCE_LINK = "https://career.habr.com";
+    private static final int TOTAL_PAGE = 5;
     private final DateTimeParser dateTimeParser;
 
     public HabrCareerParse(DateTimeParser dateTimeParser) {
         this.dateTimeParser = dateTimeParser;
     }
 
-    private static final String SOURCE_LINK = "https://career.habr.com";
-    private static final int TOTAL_PAGE = 5;
-
     public static void main(String[] args) {
         HabrCareerDateTimeParser dataParser = new HabrCareerDateTimeParser();
         HabrCareerParse vacancyParser = new HabrCareerParse(dataParser);
-
-        for (int numberOfPage = 1; numberOfPage <= TOTAL_PAGE; numberOfPage++) {
-            String pageLink = String.format("%s/vacancies/java_developer?page=%d", SOURCE_LINK, numberOfPage);
-            System.out.println(vacancyParser.list(pageLink));
-        }
+        System.out.println(vacancyParser.list(SOURCE_LINK));
     }
 
     private String retrieveDescription(String link) {
@@ -47,7 +41,6 @@ public class HabrCareerParse implements Parse {
     }
 
     private Post getPost(Element element) {
-        HabrCareerParse vacancyParser = new HabrCareerParse(dateTimeParser);
         Element titleElement = element.select(".vacancy-card__title").first();
         Element linkElement = titleElement.child(0);
         String vacancyName = titleElement.text();
@@ -56,23 +49,26 @@ public class HabrCareerParse implements Parse {
         Element vacancyDate = dataElement.child(0);
         String data = vacancyDate.attr("datetime");
         LocalDateTime parseData = dateTimeParser.parse(data);
-        String description = vacancyParser.retrieveDescription(linkToVacancy);
+        String description = retrieveDescription(linkToVacancy);
         return new Post(vacancyName, linkToVacancy, description, parseData);
     }
 
     @Override
     public List<Post> list(String link) {
         List<Post> post = new ArrayList<>();
-        Connection connection = Jsoup.connect(link);
-        Document document;
-        try {
-            document = connection.get();
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e);
-        }
-        Elements rows = document.select(".vacancy-card__inner");
-        for (Element row : rows) {
-            post.add(getPost(row));
+        for (int numberOfPage = 1; numberOfPage <= TOTAL_PAGE; numberOfPage++) {
+            String pageLink = String.format("%s/vacancies/java_developer?page=%d", link, numberOfPage);
+            Connection connection = Jsoup.connect(pageLink);
+            Document document;
+            try {
+                document = connection.get();
+            } catch (IOException e) {
+                throw new IllegalArgumentException(e);
+            }
+            Elements rows = document.select(".vacancy-card__inner");
+            for (Element row : rows) {
+                post.add(getPost(row));
+            }
         }
         return post;
     }
