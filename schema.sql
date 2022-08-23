@@ -2,6 +2,6 @@ CREATE TABLE post (
 	id serial primary key,
 	name TEXT,
 	text TEXT,
-	lint TEXT UNIQUE,
+	link VARCHAR(255) UNIQUE,
 	created TIMESTAMP
 );
