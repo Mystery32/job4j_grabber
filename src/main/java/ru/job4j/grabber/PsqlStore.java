@@ -11,20 +11,25 @@ public class PsqlStore implements Store, AutoCloseable {
 
     private Connection cnn;
 
-    public PsqlStore(Properties cfg) throws SQLException {
+    public PsqlStore(Properties cfg) {
         try {
             Class.forName(cfg.getProperty("jdbc.driver"));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
-        cnn = DriverManager.getConnection(cfg.getProperty("url"),
-                cfg.getProperty("username"),
-                cfg.getProperty("password"));
+        try {
+            cnn = DriverManager.getConnection(cfg.getProperty("url"),
+                    cfg.getProperty("username"),
+                    cfg.getProperty("password"));
+        } catch (SQLException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     @Override
     public void save(Post post) {
-        try (PreparedStatement ps = cnn.prepareStatement("insert into post(name, text, link, created) values (?, ?, ?, ?);")) {
+        try (PreparedStatement ps = cnn.prepareStatement("insert into post(name, text, link, created) "
+                + "values (?, ?, ?, ?) on conflict (link) do nothing;")) {
             ps.setString(1, post.getTitle());
             ps.setString(2, post.getDescription());
             ps.setString(3, post.getLink());
