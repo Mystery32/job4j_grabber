@@ -90,17 +90,16 @@ public class PsqlStore implements Store, AutoCloseable {
             Properties config = new Properties();
             config.load(in);
             Class.forName(config.getProperty("jdbc.driver"));
-            PsqlStore psqlStore = new PsqlStore(config);
-            Post post1 = new Post("Java junior разработчик", "https://job4j.ru/profile1/",
-                    "Нужен разработчик без опыта", LocalDateTime.now());
-            Post post2 = new Post("Java middle разработчик", "https://job4j.ru/profile2/",
-                    "Нужен разработчик с опытом от двух лет", LocalDateTime.now());
-            psqlStore.save(post1);
-            psqlStore.save(post2);
-            System.out.println(psqlStore.getAll());
-            System.out.println(psqlStore.findById(2));
-            psqlStore.close();
-
+            try (PsqlStore psqlStore = new PsqlStore(config)) {
+                Post post1 = new Post("Java junior разработчик", "https://job4j.ru/profile1/",
+                        "Нужен разработчик без опыта", LocalDateTime.now());
+                Post post2 = new Post("Java middle разработчик", "https://job4j.ru/profile2/",
+                        "Нужен разработчик с опытом от двух лет", LocalDateTime.now());
+                psqlStore.save(post1);
+                psqlStore.save(post2);
+                System.out.println(psqlStore.getAll());
+                System.out.println(psqlStore.findById(2));
+            }
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
