@@ -1,5 +1,8 @@
 package ru.job4j.grabber;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.InputStream;
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -11,18 +14,20 @@ public class PsqlStore implements Store, AutoCloseable {
 
     private Connection cnn;
 
+    private static final Logger LOG = LoggerFactory.getLogger(PsqlStore.class.getName());
+
     public PsqlStore(Properties cfg) {
         try {
             Class.forName(cfg.getProperty("jdbc.driver"));
         } catch (Exception e) {
-            throw new IllegalStateException(e);
+            LOG.error(e.getMessage(), e);
         }
         try {
             cnn = DriverManager.getConnection(cfg.getProperty("url"),
                     cfg.getProperty("username"),
                     cfg.getProperty("password"));
         } catch (SQLException e) {
-            throw new IllegalArgumentException(e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -39,9 +44,8 @@ public class PsqlStore implements Store, AutoCloseable {
             ps.setTimestamp(4, Timestamp.valueOf(post.getCreated()));
             ps.execute();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
-
     }
 
     /**
@@ -56,8 +60,8 @@ public class PsqlStore implements Store, AutoCloseable {
                     posts.add(resultPost(resultSet));
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
         }
         return posts;
     }
@@ -75,8 +79,8 @@ public class PsqlStore implements Store, AutoCloseable {
                     post = resultPost(resultSet);
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
         }
         return post;
     }
@@ -110,9 +114,7 @@ public class PsqlStore implements Store, AutoCloseable {
                 System.out.println(psqlStore.findById(2));
             }
         } catch (Exception e) {
-            throw new IllegalStateException(e);
+            LOG.error(e.getMessage(), e);
         }
-
     }
-
 }
