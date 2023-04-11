@@ -7,3 +7,6 @@
 Параметры запуска прописываются в файле настроек app.properties:  
 port - HTTP порт для просмотра вакансий  
 time - интервал парсинга
+
+#### Стек технологий: 
+Java 14, PostgreSQL, JDBC, Quartz-Scheduler, Jsoup, log4j+slf4j, Maven, Git
