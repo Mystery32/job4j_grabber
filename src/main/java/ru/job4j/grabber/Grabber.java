@@ -1,5 +1,7 @@
 package ru.job4j.grabber;
-
+/**
+ * Класс описывает работу с планировщиком, чтением и записью данных с сайта
+ */
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
@@ -20,24 +22,42 @@ public class Grabber implements Grab {
     private static final String SOURCE_LINK = "https://career.habr.com/vacancies/java_developer?page=";
     private final Properties cfg = new Properties();
 
+    /**
+     * Метод описывает соединение чтение файла с настройками
+     * @return на выходе настройки
+     */
     public Store store() {
         return new PsqlStore(cfg);
     }
 
+    /**
+     * Метод описывает планировщика
+     * @return на выходе работающий планировщик
+     * @throws SchedulerException исключения ловим
+     */
     public Scheduler scheduler() throws SchedulerException {
         Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
         scheduler.start();
         return scheduler;
     }
 
-    public void cfg() {
+    /**
+     * Метод описывает чтение файла с настройками
+     * @throws IOException ловим исключения, которые могут появиться
+     */
+    public void cfg() throws IOException {
         try (InputStream in = Grabber.class.getClassLoader().getResourceAsStream("app.properties")) {
             cfg.load(in);
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e);
         }
     }
 
+    /**
+     * Инициализация задания
+     * @param parse задание - парсер сайта
+     * @param store задание - добавление в бд
+     * @param scheduler расписание
+     * @throws SchedulerException исключения ловим
+     */
     @Override
     public void init(Parse parse, Store store, Scheduler scheduler) throws SchedulerException {
         JobDataMap data = new JobDataMap();
@@ -58,6 +78,10 @@ public class Grabber implements Grab {
 
     public static class GrabJob implements Job {
 
+        /**
+         * Метод описывает выполнение самого задания
+         * @param context на входе контекст
+         */
         @Override
         public void execute(JobExecutionContext context) {
             JobDataMap map = context.getJobDetail().getJobDataMap();

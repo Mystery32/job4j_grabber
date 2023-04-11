@@ -26,6 +26,9 @@ public class PsqlStore implements Store, AutoCloseable {
         }
     }
 
+    /**
+    Сохраняет объявление в базе
+    */
     @Override
     public void save(Post post) {
         try (PreparedStatement ps = cnn.prepareStatement("insert into post(name, text, link, created) "
@@ -41,6 +44,9 @@ public class PsqlStore implements Store, AutoCloseable {
 
     }
 
+    /**
+       Позволяет извлечь объявления из базы
+    */
     @Override
     public List<Post> getAll() {
         List<Post> posts = new ArrayList<>();
@@ -56,6 +62,9 @@ public class PsqlStore implements Store, AutoCloseable {
         return posts;
     }
 
+    /**
+     Позволяет извлечь объявление из базы по id
+    */
     @Override
     public Post findById(int id) {
         Post post = null;
